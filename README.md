@@ -1,66 +1,127 @@
 # ThreadSync: Thread Synchronization & Race Condition Visualizer
 
-Mini Project สำหรับเรียนรู้ Thread, Multithreading, Shared Resource, Race Condition และ Synchronization ผ่าน Web Visualization
+Mini Project สำหรับแสดงการทำงานของ Thread และการเข้าถึง Shared Resource โดยเน้นให้เห็นความแตกต่างระหว่างการทำงานแบบไม่มี Synchronization และการทำงานที่ใช้ Lock
+
+ระบบใช้ Shared Counter เป็นตัวอย่างหลัก และมี Web UI สำหรับกำหนดค่าการทดลองและดูสถานะของแต่ละ Thread ระหว่างการทำงาน
 
 ## Technology Stack
-- Java 17+ (โค้ดใช้ Java Standard Library)
-- `com.sun.net.httpserver.HttpServer` สำหรับ Web Server ขนาดเล็ก
-- `java.util.concurrent` สำหรับ Thread/Executor/Barrier
-- `ReentrantLock` สำหรับ Synchronization Mode
-- HTML/CSS/JavaScript สำหรับ Visualization
-- ไม่มี External Dependency และไม่มี Maven/Gradle ที่ต้องดาวน์โหลดเพิ่ม
+
+* Java 17+
+* Java Standard Library
+* `com.sun.net.httpserver.HttpServer` สำหรับ Web Server
+* `java.util.concurrent` สำหรับ Thread, Executor และ Barrier
+* `ReentrantLock` สำหรับ Synchronization Mode
+* HTML / CSS / JavaScript สำหรับ Web UI
+* ไม่ใช้ External Dependency
+* ไม่ใช้ Maven หรือ Gradle
 
 ## Requirements
-- JDK 17 หรือใหม่กว่า
-- Browser สมัยใหม่ เช่น Chrome/Safari/Firefox
-- macOS/Linux/Windows
 
-> Prototype นี้ตั้งใจให้เหมาะกับ environment ที่อาจไม่มี Internet หรือไม่สามารถติดตั้ง dependency เพิ่มได้
+* JDK 17 หรือใหม่กว่า
+* Web Browser เช่น Chrome, Safari หรือ Firefox
+* macOS / Linux / Windows
+
+Prototype นี้ออกแบบให้สามารถ Compile และ Run ได้ด้วย Java Standard Library โดยไม่ต้องติดตั้ง Library เพิ่ม
 
 ## Run
-จากโฟลเดอร์ `ThreadSync`:
+
+เปิด Terminal แล้วเข้าไปที่โฟลเดอร์ `ThreadSync`
 
 ```bash
 chmod +x scripts/run.sh
 ./scripts/run.sh
 ```
 
-จากนั้นเปิด `http://localhost:8080`
+จากนั้นเปิด Browser และเข้า:
 
-หยุดด้วย `Ctrl+C`
+```text
+http://localhost:8080
+```
+
+เมื่อต้องการหยุดโปรแกรม ให้กด:
+
+```text
+Ctrl + C
+```
 
 ## How to Use
-1. กำหนด Number of Threads (2–8)
-2. กำหนด Iterations ต่อ Thread (1–1000)
+
+1. กำหนดจำนวน Thread ที่ต้องการใช้ (2–8)
+2. กำหนดจำนวน Iterations ต่อ Thread (1–1000)
 3. กำหนด Delay (0–100 ms)
-4. เลือก `Without Synchronization` เพื่อสังเกต Read-Modify-Write ที่ไม่ถูกป้องกัน
-5. เลือก `With Synchronization` เพื่อสังเกต Lock และ Critical Section
-6. ดู Counter, Thread Status, Lock Holder และ Event Log
-7. กด Reset เพื่อกลับสู่สถานะพร้อมทดลองใหม่
+4. เลือก `Without Synchronization` เพื่อทดลองการเข้าถึง Shared Counter โดยไม่มี Lock
+5. เลือก `With Synchronization` เพื่อทดลองการใช้ `ReentrantLock`
+6. ดูค่าของ Counter, Expected Result, Actual Result และสถานะของ Thread
+7. ดู Lock Holder และ Event Log ระหว่างการทำงาน
+8. กด `Reset` เมื่อต้องการเริ่มการทดลองใหม่
 
-## Race Condition Mode
-Shared counter ถูกอ่าน เก็บค่าไว้คำนวณ และเขียนกลับโดยไม่มี Lock ระหว่าง critical sequence ดังนั้นหลาย Thread อาจอ่านค่าเดียวกันแล้วเขียนทับกัน เกิด Lost Update ได้ ผล Actual Result ต้องมาจากการ Run จริงและอาจไม่ผิดพลาดทุกครั้ง
+## Without Synchronization
 
-## Synchronization Mode
-ใช้ `ReentrantLock` ครอบ Critical Section ทำให้มี Thread เดียวในช่วง Read-Modify-Write ต่อครั้ง Thread อื่นจะแสดงสถานะ WAITING และมีการแสดง Lock Holder
+ใน Mode นี้ Thread จะทำงานกับ Shared Counter โดยไม่มี Lock ครอบส่วน Read-Modify-Write
+
+เมื่อหลาย Thread อ่านค่า Counter ในช่วงเวลาใกล้กัน อาจเกิดกรณีที่แต่ละ Thread ได้อ่านค่าเดียวกัน แล้วนำค่าที่คำนวณได้กลับมาเขียนทับกัน ทำให้จำนวนครั้งที่เพิ่มจริงน้อยกว่าค่าที่คาดไว้
+
+ผลลัพธ์ของ Mode นี้ขึ้นอยู่กับจังหวะการทำงานของ Thread ดังนั้น Actual Result อาจแตกต่างกันในแต่ละ Run และไม่ได้กำหนดค่าผลลัพธ์ไว้ล่วงหน้า
+
+## With Synchronization
+
+Mode นี้ใช้ `ReentrantLock` เพื่อควบคุมส่วน Critical Section ของการทำงานกับ Shared Counter
+
+Thread ที่ได้รับ Lock จะสามารถทำ Read-Modify-Write ได้ ส่วน Thread อื่นที่ยังไม่ได้รับ Lock จะต้องรอ
+
+หน้า Web UI จะแสดง Thread ที่ถือ Lock ผ่าน `Lock Holder` และแสดงสถานะการรอของ Thread รวมถึง Event ที่เกิดขึ้นระหว่างการทำงาน
 
 ## Testing
-ดู `docs/testing-results.md` และ `scripts/run_tests.sh` ผลในเอกสารจะเป็นผลจากการ Run จริงของ environment ที่สร้าง prototype นี้
+
+การทดสอบสามารถรันได้ด้วย:
+
+```bash
+./scripts/run_tests.sh
+```
+
+ผลการทดสอบที่บันทึกไว้สามารถดูได้ที่:
+
+```text
+docs/testing-results.md
+```
+
+การทดสอบในเอกสารดังกล่าวเป็นผลจากการ Run Prototype ใน Environment ที่ใช้พัฒนา
 
 ## Project Structure
+
 ```text
 ThreadSync/
-├── src/threadsync/Main.java
-├── src/web/index.html
-├── src/web/app.css
-├── src/web/app.js
-├── tests/ThreadSyncTest.java
-├── scripts/run.sh
-├── scripts/run_tests.sh
-├── docs/testing-results.md
-├── docs/architecture.svg
-└── report/ThreadSync_Progress_Report.docx
+├── src/
+│   ├── threadsync/
+│   │   └── Main.java
+│   └── web/
+│       ├── index.html
+│       ├── app.css
+│       └── app.js
+├── tests/
+│   └── ThreadSyncTest.java
+├── scripts/
+│   ├── run.sh
+│   └── run_tests.sh
+├── docs/
+│   ├── testing-results.md
+│   └── architecture.svg
+└── report/
+    └── ThreadSync_Progress_Report.docx
 ```
 
 ## Academic References
-อ้างอิงที่ใช้ในรายงานมาจาก Oracle Java documentation และ Java Language Specification โดยตรวจสอบ URL ก่อนจัดทำรายงาน
+
+เอกสารอ้างอิงที่ใช้ประกอบการพัฒนาและจัดทำรายงานมาจาก Oracle Java Documentation และ Java Language Specification
+
+* Oracle — Synchronization
+  https://docs.oracle.com/javase/tutorial/essential/concurrency/sync.html
+
+* Oracle — Thread Interference
+  https://docs.oracle.com/javase/tutorial/essential/concurrency/interfere.html
+
+* Oracle — Java Language Specification, Java SE 17, Chapter 17: Threads and Locks
+  https://docs.oracle.com/javase/specs/jls/se17/html/jls-17.html
+
+* Oracle — ReentrantLock, Java SE 17 API
+  https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/concurrent/locks/ReentrantLock.html
