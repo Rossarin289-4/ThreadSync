@@ -1,0 +1,12 @@
+<!doctype html><html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ThreadSync</title><link rel="stylesheet" href="/app.css"></head><body>
+<header><div><h1>ThreadSync</h1><p>Thread Synchronization & Race Condition Visualizer</p></div><div class="badge">Educational Prototype</div></header>
+<main>
+<section class="controls card"><h2>Experiment Configuration</h2><div class="grid">
+<label>Number of Threads<input id="threads" type="number" min="2" max="8" value="3"></label>
+<label>Iterations / Thread<input id="iterations" type="number" min="1" max="1000" value="100"></label>
+<label>Delay (ms)<input id="delay" type="number" min="0" max="100" value="5"></label>
+</div><div class="actions"><button id="race" class="danger">Without Synchronization</button><button id="sync" class="primary">With Synchronization</button><button id="reset" class="ghost">Reset</button></div><div class="explain"><b>Race Condition:</b> ผลลัพธ์อาจขึ้นกับจังหวะการสลับการทำงานของ Thread เมื่อ Shared Resource ถูกเข้าถึงโดยไม่มีการควบคุมที่เพียงพอ<br><b>Synchronization:</b> Critical Section ถูกควบคุมด้วย Lock ทำให้ Thread อื่นต้องรอเมื่อ Resource ถูกถือครอง</div></section>
+<section class="dashboard"><div class="card counter"><span>Shared Counter</span><strong id="counter">0</strong><small>Expected: <b id="expected">300</b></small></div><div class="card result"><span>Result</span><strong id="result">READY</strong><small id="resultDetail">Run an experiment</small></div><div class="card holder"><span>Lock Holder</span><strong id="holder">-</strong><small id="mode">Mode: -</small></div></section>
+<section class="card"><div class="section-head"><h2>Thread Visualization</h2><span id="progressText">0 / 300 operations</span></div><div id="threadsView" class="threads"></div></section>
+<section class="card"><div class="section-head"><h2>Timeline / Event Log</h2><span id="live">Idle</span></div><div id="events" class="events"></div></section>
+</main><footer>ThreadSync Prototype • Java Standard Library • No external runtime dependency</footer><script src="/app.js"></script></body></html>

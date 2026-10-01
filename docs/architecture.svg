@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="560" viewBox="0 0 1100 560">
+<rect width="1100" height="560" fill="#f3f5f8"/>
+<style>.box{fill:white;stroke:#94a3b8;stroke-width:2;rx:14}.t{font-family:Arial,sans-serif;fill:#172033}.h{font-size:22px;font-weight:bold}.s{font-size:16px}.a{stroke:#334155;stroke-width:3;marker-end:url(#arrow)}</style>
+<defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#334155"/></marker></defs>
+<text x="550" y="42" text-anchor="middle" class="t h">ThreadSync Architecture</text>
+<rect x="400" y="70" width="300" height="65" class="box"/><text x="550" y="98" text-anchor="middle" class="t h">Browser UI</text><text x="550" y="121" text-anchor="middle" class="t s">HTML / CSS / JavaScript</text>
+<line x1="550" y1="135" x2="550" y2="175" class="a"/>
+<rect x="350" y="175" width="400" height="65" class="box"/><text x="550" y="203" text-anchor="middle" class="t h">Java HTTP Server</text><text x="550" y="226" text-anchor="middle" class="t s">HttpServer + REST-like endpoints</text>
+<line x1="550" y1="240" x2="550" y2="280" class="a"/>
+<rect x="350" y="280" width="400" height="65" class="box"/><text x="550" y="308" text-anchor="middle" class="t h">Simulation Controller</text><text x="550" y="331" text-anchor="middle" class="t s">start / state / reset</text>
+<line x1="550" y1="345" x2="550" y2="385" class="a"/>
+<rect x="100" y="385" width="260" height="95" class="box"/><text x="230" y="414" text-anchor="middle" class="t h">Thread Workers</text><text x="230" y="438" text-anchor="middle" class="t s">Thread-1 … Thread-N</text><text x="230" y="462" text-anchor="middle" class="t s">Concurrent execution</text>
+<rect x="420" y="385" width="260" height="95" class="box"/><text x="550" y="414" text-anchor="middle" class="t h">Shared Counter</text><text x="550" y="438" text-anchor="middle" class="t s">Read → Modify → Write</text><text x="550" y="462" text-anchor="middle" class="t s">Expected vs Actual</text>
+<rect x="740" y="385" width="260" height="95" class="box"/><text x="870" y="414" text-anchor="middle" class="t h">Synchronization</text><text x="870" y="438" text-anchor="middle" class="t s">ReentrantLock</text><text x="870" y="462" text-anchor="middle" class="t s">Waiting / Holder / Critical Section</text>
+<line x1="360" y1="432" x2="420" y2="432" class="a"/><line x1="680" y1="432" x2="740" y2="432" class="a"/>
+<text x="550" y="525" text-anchor="middle" class="t s">Event Log ← simulation events → Visualization state</text>
+</svg>
