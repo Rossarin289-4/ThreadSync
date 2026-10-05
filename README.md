@@ -502,7 +502,6 @@ Ctrl + C
 14. โครงสร้างโปรเจกต์
 
 ```text
-```text
 ThreadSync/
 
 ├── src/
@@ -558,7 +557,6 @@ ThreadSync/
 │
 
 └── README.md
-```
 ```
 
 15. สรุป
