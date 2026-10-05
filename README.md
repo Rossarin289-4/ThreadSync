@@ -1,127 +1,58 @@
 # ThreadSync: Thread Synchronization & Race Condition Visualizer
 
-Mini Project สำหรับแสดงการทำงานของ Thread และการเข้าถึง Shared Resource โดยเน้นให้เห็นความแตกต่างระหว่างการทำงานแบบไม่มี Synchronization และการทำงานที่ใช้ Lock
+Mini Project สำหรับเรียนรู้การทำงานของ Java Thread, Shared Resource, Race Condition และ ReentrantLock ผ่าน Web UI แบบโต้ตอบได้
 
-ระบบใช้ Shared Counter เป็นตัวอย่างหลัก และมี Web UI สำหรับกำหนดค่าการทดลองและดูสถานะของแต่ละ Thread ระหว่างการทำงาน
+จุดสำคัญคือทุก Event และผลลัพธ์มาจากการทำงานจริงของ Java Worker Thread ในแต่ละรอบ ไม่ใช่ Animation หรือข้อมูล hard-code ดังนั้นผลของ Race Condition อาจแตกต่างกันได้ในแต่ละการทดลอง
+
+## Features
+
+- ทดลองแบบ `Without Synchronization` เพื่อดู Race Condition และ Lost Update จริง
+- ทดลองแบบ `With ReentrantLock` เพื่อดูการป้องกัน Critical Section
+- `Compare Mode` เปรียบเทียบ No Sync และ ReentrantLock แบบ side-by-side
+- ใช้ค่า input เดียวกัน แต่แต่ละฝั่งมี Simulation State และ Shared Counter แยกกัน
+- แสดงสถานะทุก Thread ทั้งภาษาไทยและอังกฤษ เช่น
+  - กำลังอ่าน (READ)
+  - กำลังคำนวณ (MODIFY)
+  - กำลังเขียน (WRITE)
+  - กำลังรอ Lock (WAITING FOR LOCK)
+  - ถือ Lock อยู่ (LOCK OWNER)
+  - เสร็จสิ้น (COMPLETED)
+- Thread Inspector: กดการ์ดของ Thread เพื่อดู Timeline และประวัติราย Thread
+- บันทึก Event จริง เช่น `CREATED`, `READ`, `MODIFY`, `WRITE`, `REQUEST LOCK`,
+  `WAITING FOR LOCK`, `ACQUIRED LOCK`, `RELEASE LOCK`, `COMPLETED`, `LOST UPDATE`
+- เมื่อรอ Lock จะแสดงเจ้าของ Lock เช่น  
+  `กำลังรอ Thread-2 / Waiting for Thread-2`
+- เมื่อเกิด Lost Update จะแสดง
+  - ค่าที่ Thread อ่าน (Read Value)
+  - ค่าที่ตั้งใจเขียน (Intended Write Value)
+  - Shared Counter ก่อนและหลังเขียน
+  - Thread ที่เขียนแทรกระหว่าง READ กับ WRITE
+- Filter Timeline ตาม Event: All, READ, MODIFY, WRITE, LOCK, WAIT, LOST UPDATE
+- เลือกดูประวัติตาม Iteration ได้
+- Summary ต่อ Thread: Writes, Successful Updates, Lost Updates, Lock Waits และ Completed Iterations
+- ควบคุมการทดลองด้วย Pause, Resume และ Next Step
+- Export ผลลัพธ์เป็น JSON และ CSV
 
 ## Technology Stack
 
-* Java 17+
-* Java Standard Library
-* `com.sun.net.httpserver.HttpServer` สำหรับ Web Server
-* `java.util.concurrent` สำหรับ Thread, Executor และ Barrier
-* `ReentrantLock` สำหรับ Synchronization Mode
-* HTML / CSS / JavaScript สำหรับ Web UI
-* ไม่ใช้ External Dependency
-* ไม่ใช้ Maven หรือ Gradle
+- Java 17+
+- Java Standard Library
+- `com.sun.net.httpserver.HttpServer`
+- `java.util.concurrent`
+- `ReentrantLock`
+- HTML, CSS และ JavaScript
+- ไม่ใช้ External Dependency
+- ไม่ใช้ Maven หรือ Gradle
 
 ## Requirements
 
-* JDK 17 หรือใหม่กว่า
-* Web Browser เช่น Chrome, Safari หรือ Firefox
-* macOS / Linux / Windows
+- JDK 17 หรือใหม่กว่า
+- Web Browser เช่น Chrome, Edge, Firefox หรือ Safari
+- Windows, macOS หรือ Linux
 
-Prototype นี้ออกแบบให้สามารถ Compile และ Run ได้ด้วย Java Standard Library โดยไม่ต้องติดตั้ง Library เพิ่ม
+## Run on Windows
 
-## Run
+เปิด PowerShell หรือ Command Prompt ในโฟลเดอร์โปรเจกต์ แล้วรัน:
 
-เปิด Terminal แล้วเข้าไปที่โฟลเดอร์ `ThreadSync`
-
-```bash
-chmod +x scripts/run.sh
-./scripts/run.sh
-```
-
-จากนั้นเปิด Browser และเข้า:
-
-```text
-http://localhost:8080
-```
-
-เมื่อต้องการหยุดโปรแกรม ให้กด:
-
-```text
-Ctrl + C
-```
-
-## How to Use
-
-1. กำหนดจำนวน Thread ที่ต้องการใช้ (2–8)
-2. กำหนดจำนวน Iterations ต่อ Thread (1–1000)
-3. กำหนด Delay (0–100 ms)
-4. เลือก `Without Synchronization` เพื่อทดลองการเข้าถึง Shared Counter โดยไม่มี Lock
-5. เลือก `With Synchronization` เพื่อทดลองการใช้ `ReentrantLock`
-6. ดูค่าของ Counter, Expected Result, Actual Result และสถานะของ Thread
-7. ดู Lock Holder และ Event Log ระหว่างการทำงาน
-8. กด `Reset` เมื่อต้องการเริ่มการทดลองใหม่
-
-## Without Synchronization
-
-ใน Mode นี้ Thread จะทำงานกับ Shared Counter โดยไม่มี Lock ครอบส่วน Read-Modify-Write
-
-เมื่อหลาย Thread อ่านค่า Counter ในช่วงเวลาใกล้กัน อาจเกิดกรณีที่แต่ละ Thread ได้อ่านค่าเดียวกัน แล้วนำค่าที่คำนวณได้กลับมาเขียนทับกัน ทำให้จำนวนครั้งที่เพิ่มจริงน้อยกว่าค่าที่คาดไว้
-
-ผลลัพธ์ของ Mode นี้ขึ้นอยู่กับจังหวะการทำงานของ Thread ดังนั้น Actual Result อาจแตกต่างกันในแต่ละ Run และไม่ได้กำหนดค่าผลลัพธ์ไว้ล่วงหน้า
-
-## With Synchronization
-
-Mode นี้ใช้ `ReentrantLock` เพื่อควบคุมส่วน Critical Section ของการทำงานกับ Shared Counter
-
-Thread ที่ได้รับ Lock จะสามารถทำ Read-Modify-Write ได้ ส่วน Thread อื่นที่ยังไม่ได้รับ Lock จะต้องรอ
-
-หน้า Web UI จะแสดง Thread ที่ถือ Lock ผ่าน `Lock Holder` และแสดงสถานะการรอของ Thread รวมถึง Event ที่เกิดขึ้นระหว่างการทำงาน
-
-## Testing
-
-การทดสอบสามารถรันได้ด้วย:
-
-```bash
-./scripts/run_tests.sh
-```
-
-ผลการทดสอบที่บันทึกไว้สามารถดูได้ที่:
-
-```text
-docs/testing-results.md
-```
-
-การทดสอบในเอกสารดังกล่าวเป็นผลจากการ Run Prototype ใน Environment ที่ใช้พัฒนา
-
-## Project Structure
-
-```text
-ThreadSync/
-├── src/
-│   ├── threadsync/
-│   │   └── Main.java
-│   └── web/
-│       ├── index.html
-│       ├── app.css
-│       └── app.js
-├── tests/
-│   └── ThreadSyncTest.java
-├── scripts/
-│   ├── run.sh
-│   └── run_tests.sh
-├── docs/
-│   ├── testing-results.md
-│   └── architecture.svg
-└── report/
-    └── ThreadSync_Progress_Report.docx
-```
-
-## Academic References
-
-เอกสารอ้างอิงที่ใช้ประกอบการพัฒนาและจัดทำรายงานมาจาก Oracle Java Documentation และ Java Language Specification
-
-* Oracle — Synchronization
-  https://docs.oracle.com/javase/tutorial/essential/concurrency/sync.html
-
-* Oracle — Thread Interference
-  https://docs.oracle.com/javase/tutorial/essential/concurrency/interfere.html
-
-* Oracle — Java Language Specification, Java SE 17, Chapter 17: Threads and Locks
-  https://docs.oracle.com/javase/specs/jls/se17/html/jls-17.html
-
-* Oracle — ReentrantLock, Java SE 17 API
-  https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/concurrent/locks/ReentrantLock.html
+```bat
+scripts\run.bat
