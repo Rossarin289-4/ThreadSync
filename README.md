@@ -420,12 +420,14 @@ ThreadSync/
 │       ├── 02-without-synchronization.png
 │       ├── 03-with-synchronization.png
 │       ├── 04-reset.png
+│       ├── 05-synchronization-2x10.png
+│       └── 06-automated-tests.png
 │
+├── .gitignore
 └── README.md
 15. สรุป
 
 ThreadSync ทำให้แนวคิดเรื่อง Shared Resource, Race Condition, Critical Section และ ReentrantLock สามารถสังเกตได้จากหลักฐานระดับ Thread แทนการดูเพียงผลรวมสุดท้าย
-
 
 จากการทดสอบจริงผ่าน Web UI:
 
@@ -444,3 +446,17 @@ Result = COMPLETED
 นอกจากนี้ Automated Test ยังผ่านทั้ง With Synchronization, Without Synchronization และ Reset API
 
 ระบบจึงสามารถใช้เป็น Web-based Prototype สำหรับสาธิตและศึกษาความแตกต่างระหว่างการทำงานแบบไม่มี Synchronization กับการใช้ ReentrantLock ใน Java Concurrency ได้
+
+เอกสารอ้างอิง
+
+[1] Oracle. Synchronization. The Java Tutorials.
+https://docs.oracle.com/javase/tutorial/essential/concurrency/sync.html
+
+[2] Oracle. Thread Interference. The Java Tutorials.
+https://docs.oracle.com/javase/tutorial/essential/concurrency/interfere.html
+
+[3] Oracle. The Java Language Specification Java SE 17 Chapter 17 Threads and Locks.
+https://docs.oracle.com/javase/specs/jls/se17/html/jls-17.html
+
+[4] Oracle. ReentrantLock Java SE 17 API Documentation.
+https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/concurrent/locks/ReentrantLock.html
