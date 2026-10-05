@@ -1,58 +1,194 @@
-# ThreadSync: Thread Synchronization & Race Condition Visualizer
+# 🧵 ThreadSync
+### Thread Synchronization & Race Condition Visualizer
 
-Mini Project สำหรับเรียนรู้การทำงานของ Java Thread, Shared Resource, Race Condition และ ReentrantLock ผ่าน Web UI แบบโต้ตอบได้
+> เว็บจำลองการทำงานของ Java Thread เพื่อให้เห็นความแตกต่างระหว่าง  
+> **Without Synchronization** และ **With ReentrantLock** อย่างเข้าใจง่าย
 
-จุดสำคัญคือทุก Event และผลลัพธ์มาจากการทำงานจริงของ Java Worker Thread ในแต่ละรอบ ไม่ใช่ Animation หรือข้อมูล hard-code ดังนั้นผลของ Race Condition อาจแตกต่างกันได้ในแต่ละการทดลอง
+![Java](https://img.shields.io/badge/Java-17%2B-orange?logo=openjdk)
+![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20macOS%20%7C%20Linux-blue)
+![Dependencies](https://img.shields.io/badge/Dependencies-None-success)
 
-## Features
+---
 
-- ทดลองแบบ `Without Synchronization` เพื่อดู Race Condition และ Lost Update จริง
-- ทดลองแบบ `With ReentrantLock` เพื่อดูการป้องกัน Critical Section
-- `Compare Mode` เปรียบเทียบ No Sync และ ReentrantLock แบบ side-by-side
-- ใช้ค่า input เดียวกัน แต่แต่ละฝั่งมี Simulation State และ Shared Counter แยกกัน
-- แสดงสถานะทุก Thread ทั้งภาษาไทยและอังกฤษ เช่น
-  - กำลังอ่าน (READ)
-  - กำลังคำนวณ (MODIFY)
-  - กำลังเขียน (WRITE)
-  - กำลังรอ Lock (WAITING FOR LOCK)
-  - ถือ Lock อยู่ (LOCK OWNER)
-  - เสร็จสิ้น (COMPLETED)
-- Thread Inspector: กดการ์ดของ Thread เพื่อดู Timeline และประวัติราย Thread
-- บันทึก Event จริง เช่น `CREATED`, `READ`, `MODIFY`, `WRITE`, `REQUEST LOCK`,
-  `WAITING FOR LOCK`, `ACQUIRED LOCK`, `RELEASE LOCK`, `COMPLETED`, `LOST UPDATE`
-- เมื่อรอ Lock จะแสดงเจ้าของ Lock เช่น  
-  `กำลังรอ Thread-2 / Waiting for Thread-2`
-- เมื่อเกิด Lost Update จะแสดง
-  - ค่าที่ Thread อ่าน (Read Value)
-  - ค่าที่ตั้งใจเขียน (Intended Write Value)
-  - Shared Counter ก่อนและหลังเขียน
-  - Thread ที่เขียนแทรกระหว่าง READ กับ WRITE
-- Filter Timeline ตาม Event: All, READ, MODIFY, WRITE, LOCK, WAIT, LOST UPDATE
-- เลือกดูประวัติตาม Iteration ได้
-- Summary ต่อ Thread: Writes, Successful Updates, Lost Updates, Lock Waits และ Completed Iterations
-- ควบคุมการทดลองด้วย Pause, Resume และ Next Step
-- Export ผลลัพธ์เป็น JSON และ CSV
+## ✨ จุดเด่นของโปรเจกต์
 
-## Technology Stack
+- 🧪 ทดลอง Race Condition จากการทำงานจริงของ Java Worker Thread
+- 🔒 เปรียบเทียบ `Without Synchronization` กับ `With ReentrantLock`
+- ⚖️ Compare Mode แสดงผลทั้งสองฝั่งแบบ side-by-side
+- 🔍 **Thread Inspector** — กดการ์ด Thread เพื่อดูประวัติการทำงานราย Thread
+- 🕒 Timeline ของ Event เช่น `READ`, `MODIFY`, `WRITE`, `WAIT`, `LOCK`
+- ⚠️ ตรวจจับและอธิบาย **Lost Update** จากข้อมูลจริง
+- 👤 แสดงว่า Thread ใดกำลังถือ Lock และ Thread ใดกำลังรอ
+- ⏯️ ควบคุมการทดลองด้วย Pause, Resume และ Next Step
+- 📥 Export ผลลัพธ์เป็น JSON และ CSV
+- 🇹🇭 ทุกสถานะรองรับภาษาไทย + English
 
-- Java 17+
-- Java Standard Library
-- `com.sun.net.httpserver.HttpServer`
-- `java.util.concurrent`
-- `ReentrantLock`
-- HTML, CSS และ JavaScript
-- ไม่ใช้ External Dependency
-- ไม่ใช้ Maven หรือ Gradle
+---
 
-## Requirements
+## 🎯 สิ่งที่เรียนรู้ได้
 
-- JDK 17 หรือใหม่กว่า
-- Web Browser เช่น Chrome, Edge, Firefox หรือ Safari
-- Windows, macOS หรือ Linux
+| Without Synchronization | With ReentrantLock |
+|---|---|
+| หลาย Thread อ่านและเขียนค่าเดียวกันพร้อมกันได้ | เข้า Critical Section ได้ทีละ Thread |
+| อาจเกิด Race Condition | ป้องกัน Race Condition |
+| อาจเกิด Lost Update | ค่าผลลัพธ์ถูกต้องตาม Expected |
+| Shared Counter อาจน้อยกว่าที่ควรเป็น | Shared Counter ควรเท่ากับ Expected |
 
-## Run on Windows
+**สูตรผลลัพธ์ที่ควรได้**
+
+```text
+Expected Counter = จำนวน Thread × จำนวน Iterations
+```
+
+หาก `Shared Counter < Expected Counter` ใน No Sync Mode  
+แสดงว่าเกิด **Lost Update** จาก Race Condition
+
+> ผลแต่ละรอบอาจต่างกันได้ เพราะขึ้นอยู่กับจังหวะการทำงานจริงของ Thread ใน Java
+
+---
+
+## 🚀 วิธีเปิดใช้งาน
+
+### สิ่งที่ต้องมี
+
+- ติดตั้ง **JDK 17 หรือใหม่กว่า**
+- Browser เช่น Chrome, Edge หรือ Firefox
+
+ตรวจสอบ Java:
+
+```powershell
+java -version
+javac -version
+```
+
+### Windows
 
 เปิด PowerShell หรือ Command Prompt ในโฟลเดอร์โปรเจกต์ แล้วรัน:
 
-```bat
-scripts\run.bat
+```powershell
+.\scripts\run.bat
+```
+
+จากนั้นเปิด Browser ที่:
+
+```text
+http://localhost:8080
+```
+
+หยุดโปรแกรมด้วย:
+
+```text
+Ctrl + C
+```
+
+### macOS / Linux
+
+```bash
+chmod +x scripts/run.sh
+./scripts/run.sh
+```
+
+แล้วเปิด:
+
+```text
+http://localhost:8080
+```
+
+---
+
+## 🧭 วิธีทดลอง
+
+1. เลือกจำนวน **Threads** และ **Iterations**
+2. กำหนด **Delay** เพื่อทำให้เห็นการแย่งใช้ข้อมูลชัดขึ้น
+3. เลือก Mode ที่ต้องการ
+   - `Without Synchronization`
+   - `With ReentrantLock`
+   - `Compare Mode`
+4. กด Start
+5. ดูค่า `Expected Counter` เทียบกับ `Shared Counter`
+6. กดการ์ด Thread เพื่อเปิด **Thread Inspector**
+7. ใช้ Filter เพื่อดู Event ที่สนใจ เช่น READ, WRITE, WAIT หรือ LOST UPDATE
+
+---
+
+## 🔍 Thread Inspector
+
+แต่ละ Thread สามารถเปิดดูประวัติจริงได้ เช่น:
+
+```text
+CREATED
+→ READ
+→ MODIFY
+→ WRITE
+→ COMPLETED
+```
+
+เมื่อใช้ ReentrantLock จะเห็นเพิ่ม:
+
+```text
+REQUEST LOCK
+→ WAITING FOR LOCK
+→ ACQUIRED LOCK
+→ RUNNING
+→ RELEASE LOCK
+```
+
+หาก Thread รอ Lock ระบบจะแสดงตัวอย่างเช่น:
+
+```text
+กำลังรอ Thread-2 / Waiting for Thread-2
+```
+
+หากเกิด Lost Update จะแสดง:
+
+- ค่าที่ Thread อ่าน
+- ค่าที่ตั้งใจเขียน
+- Shared Counter ก่อน/หลังเขียน
+- Thread ที่เขียนแทรกระหว่าง READ และ WRITE
+
+---
+
+## 🧪 การทดสอบ
+
+```bash
+./scripts/run_tests.sh
+```
+
+ผลทดสอบดูได้ที่:
+
+```text
+docs/testing-results.md
+```
+
+---
+
+## 🗂️ โครงสร้างโปรเจกต์
+
+```text
+ThreadSync/
+├── src/
+│   ├── threadsync/Main.java
+│   └── web/
+│       ├── index.html
+│       ├── app.js
+│       ├── app.css
+│       ├── theme.css
+│       └── polish.css
+├── scripts/
+│   ├── run.bat
+│   ├── run.ps1
+│   ├── run.sh
+│   └── run_tests.sh
+├── tests/
+│   └── ThreadSyncTest.java
+└── docs/
+    ├── architecture.svg
+    ├── testing-results.md
+    └── verification.md
+```
+
+---
+
+<p align="center">
+  Built with Java 17 • Designed for learning Thread Synchronization
+</p>
