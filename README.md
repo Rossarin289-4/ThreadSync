@@ -1,7 +1,5 @@
 # ThreadSync
-
 ## Thread Synchronization & Race Condition Visualizer
-
 ThreadSync เป็นระบบ Web-based Prototype สำหรับอธิบายการทำงานแบบหลาย Thread ของ Java เมื่อเข้าถึงข้อมูลร่วมกัน โดยใช้ Shared Counter เป็นตัวอย่างหลัก ระบบเปรียบเทียบการทำงานแบบไม่มีการ Synchronization กับการใช้ ReentrantLock เพื่อให้เห็นผลของ Race Condition และ Lost Update จากการทำงานจริงของ Worker Thread
 
 ระบบบันทึกประวัติราย Thread ตั้งแต่ CREATED, READ, MODIFY, WRITE, REQUEST LOCK, WAITING FOR LOCK, ACQUIRED LOCK, RELEASE LOCK จนถึง COMPLETED รวมทั้งเหตุการณ์ LOST UPDATE ที่ตรวจพบระหว่างการเขียนค่า ผู้ใช้สามารถเปิด Thread Inspector เพื่ออ่าน Timeline และ Event Log เพื่อดูรายละเอียดการทำงานของแต่ละ Thread
@@ -9,9 +7,7 @@ ThreadSync เป็นระบบ Web-based Prototype สำหรับอธ
 ผลการทดสอบแสดงให้เห็นว่า With ReentrantLock สามารถทำให้ Shared Counter ตรงกับ Expected Counter ขณะที่ Without Synchronization สามารถเกิด Race Condition และ Lost Update จากการทำงานพร้อมกันของหลาย Thread
 
 ---
-
 ## สมาชิกกลุ่ม
-
 1. น.ส.กัญญาวี ศรีเหรา 673380026-6 Sec.1
 
 2. น.ส.รสริน เมืองหงษ์ 673380289-4 Sec.1
@@ -19,23 +15,17 @@ ThreadSync เป็นระบบ Web-based Prototype สำหรับอธ
 3. น.ส.สโรชา เสาทอง 673380296-7 Sec.1
 
 ---
-
 ## คำสำคัญ
-
 Thread, Race Condition, Lost Update, ReentrantLock, Shared Resource, Java Concurrency
 
 ---
-
 # 1. บทนำ
-
 โปรแกรมสมัยใหม่มักมีงานหลายส่วนทำงานพร้อมกัน เช่น รับคำสั่งจากผู้ใช้ ประมวลผลข้อมูล และติดต่อเครือข่าย การใช้ Thread ช่วยให้โปรแกรมตอบสนองได้ดีขึ้น แต่เมื่อ Thread หลายตัวเข้าถึงข้อมูลเดียวกัน การอ่านและเขียนที่ไม่เป็นหนึ่งเดียวอาจแทรกสลับกันจนทำให้ผลลัพธ์ผิดพลาดได้
 
 โครงงานนี้เลือก Shared Counter เพื่อสาธิตปัญหาดังกล่าว เพราะการเพิ่มค่า 1 ครั้งประกอบด้วยการอ่านค่าเดิม การคำนวณค่าใหม่ และการเขียนค่ากลับ หาก Thread หลายตัวอ่านค่าเดิมซ้ำกันก่อนเขียน ผลจาก Thread หนึ่งอาจถูกเขียนทับโดยอีก Thread หนึ่ง ปรากฏการณ์นี้เรียกว่า Lost Update
 
 ---
-
 # 2. วัตถุประสงค์
-
 - สร้างระบบจำลอง Thread หลายตัวที่เข้าถึง Shared Counter ร่วมกัน
 
 - สาธิต Race Condition และ Lost Update จาก Java Worker Thread จริง
@@ -47,9 +37,7 @@ Thread, Race Condition, Lost Update, ReentrantLock, Shared Resource, Java Concur
 - พัฒนา Web UI ภาษาไทยและอังกฤษที่เหมาะกับการเรียนรู้และการนำเสนอ
 
 ---
-
 # 3. ขอบเขตและเทคโนโลยี
-
 | หัวข้อ | รายละเอียด |
 
 |---|---|
@@ -69,25 +57,19 @@ Thread, Race Condition, Lost Update, ReentrantLock, Shared Resource, Java Concur
 | โหมดการทดลอง | Without Synchronization, With ReentrantLock และ Compare Mode |
 
 ---
-
 # 4. การออกแบบระบบ
-
 ระบบแบ่งเป็น Web UI และ Java Backend ผู้ใช้กำหนดจำนวน Thread, Iterations, Delay และโหมดการทดลองผ่านหน้าเว็บ จากนั้น Java HTTP Server เริ่ม Simulation Controller ซึ่งสร้าง Worker Thread ตามจำนวนที่กำหนด
 
 สถานะของ Simulation และประวัติเหตุการณ์ถูกส่งกลับไปแสดงผลผ่าน Shared Counter, Result, Lock Holder, Thread Visualization และ Timeline / Event Log
 
 ### สถาปัตยกรรมระบบ
-
 ![ThreadSync Architecture](docs/architecture.png)
 
-*ภาพสถาปัตยกรรมของ ThreadSync*
+*\*ภาพสถาปัตยกรรมของ ThreadSync\**
 
 ---
-
 # 5. หลักการทำงาน
-
 ## 5.1 Without Synchronization
-
 แต่ละ Worker Thread ทำงานตามลำดับ READ → MODIFY → WRITE โดยไม่มี Lock ครอบส่วนนี้
 
 หาก Thread A และ Thread B อ่านค่า 10 พร้อมกัน ทั้งสองอาจคำนวณค่าที่จะเขียนเป็น 11 เมื่อเขียนกลับครบทั้งสอง Thread ค่าสุดท้ายยังเป็น 11 แทนที่จะเป็น 12 ปรากฏการณ์ดังกล่าวคือ Lost Update
@@ -95,9 +77,7 @@ Thread, Race Condition, Lost Update, ReentrantLock, Shared Resource, Java Concur
 ระบบตรวจสอบผลจากข้อมูลการทำงานจริงในขณะ WRITE ไม่ได้กำหนดผลลัพธ์ไว้ล่วงหน้า
 
 ---
-
 ## 5.2 With ReentrantLock
-
 Thread จะขอ Lock ก่อนเข้าสู่ Critical Section หาก Lock ถูกถืออยู่ Thread จะเข้าสู่สถานะ WAITING FOR LOCK
 
 เมื่อต้องการทำงานภายใน Critical Section ลำดับการทำงานคือ
@@ -129,6 +109,7 @@ WRITE
     ↓
 
 RELEASE LOCK
+```
 
 การใช้ ReentrantLock ทำให้ Read-Modify-Write ถูกควบคุมภายใน Critical Section และไม่ถูกแทรกกลางโดย Thread อื่น
 
@@ -142,27 +123,18 @@ Compare Mode ใช้ input เดียวกันสำหรับทั้
 
 Thread Inspector และ Timeline / Event Log ใช้สำหรับติดตามการทำงานของ Thread แต่ละตัว
 
-Event   ความหมาย
-
-CREATED สร้าง Worker Thread
-
-READ    อ่านค่าจาก Shared Counter
-
-MODIFY  คำนวณค่าที่ต้องการเขียน
-
-WRITE   เขียนค่ากลับไปยัง Shared Counter
-
-REQUEST LOCK    ขอ Lock
-
-WAITING FOR LOCK    กำลังรอ Lock
-
-ACQUIRED LOCK   ได้รับ Lock
-
-RELEASE LOCK    ปล่อย Lock
-
-LOST UPDATE ตรวจพบการเปลี่ยนค่าที่เกิดจากการแทรกของ Thread อื่น
-
-COMPLETED   การทำงานเสร็จสิ้น
+| Event | ความหมาย |
+|---|---|
+| CREATED | สร้าง Worker Thread |
+| READ | อ่านค่าจาก Shared Counter |
+| MODIFY | คำนวณค่าที่ต้องการเขียน |
+| WRITE | เขียนค่ากลับไปยัง Shared Counter |
+| REQUEST LOCK | ขอ Lock |
+| WAITING FOR LOCK | กำลังรอ Lock |
+| ACQUIRED LOCK | ได้รับ Lock |
+| RELEASE LOCK | ปล่อย Lock |
+| LOST UPDATE | ตรวจพบการเปลี่ยนค่าที่เกิดจากการแทรกของ Thread อื่น |
+| COMPLETED | การทำงานเสร็จสิ้น |
 
 Event Log ช่วยให้สามารถติดตามลำดับการทำงานจริงของหลาย Thread และอธิบายสาเหตุของ Race Condition ได้
 
@@ -216,7 +188,9 @@ javac 21.0.12.1
 
 โปรเจกต์ใช้คำสั่ง Compile ดังนี้:
 
+```text
 javac --release 17 -d build/classes src/threadsync/Main.java
+```
 
 ดังนั้น Java 21 ที่ใช้ในการทดสอบสามารถ Compile Source ที่กำหนด Java Release 17 ได้
 
@@ -224,17 +198,13 @@ javac --release 17 -d build/classes src/threadsync/Main.java
 
 9.1 Initial UI
 
-![Initial UI](docs/screenshots/01-initial-ui.png)
-
 หน้าจอเริ่มต้นก่อนการทดลอง แสดง Experiment Configuration, Shared Counter, Result, Lock Holder, Thread Visualization และ Timeline / Event Log
 
+![Initial UI](docs/screenshots/01-initial-ui.png)
 
-
-ภาพที่ 1 หน้าจอเริ่มต้นของ ThreadSync
+*ภาพที่ 1 หน้าจอเริ่มต้นของ ThreadSync*
 
 9.2 Without Synchronization
-
-![Without Synchronization](docs/screenshots/02-without-synchronization.png)
 
 กำหนดค่าการทดลอง:
 
@@ -260,13 +230,11 @@ RACE CONDITION
 
 Event Log แสดงการทำงานของ Thread หลายตัวที่อ่านและเขียน Shared Counter พร้อมกัน ซึ่งทำให้เกิด Lost Update
 
+![Without Synchronization](docs/screenshots/02-without-synchronization.png)
 
-
-ภาพที่ 2 ผลการทดลอง Without Synchronization
+*ภาพที่ 2 ผลการทดลอง Without Synchronization*
 
 9.3 With Synchronization
-
-![With Synchronization](docs/screenshots/03-with-synchronization.png)
 
 ใช้ค่าการทดลองเดียวกัน:
 
@@ -292,21 +260,17 @@ COMPLETED
 
 Event Log แสดงการทำงานของ Lock เช่น Waiting for Lock, Acquired Lock, Writing Counter และ Released Lock
 
+![With Synchronization](docs/screenshots/03-with-synchronization.png)
 
-
-ภาพที่ 3 ผลการทดลอง With ReentrantLock
+*ภาพที่ 3 ผลการทดลอง With ReentrantLock*
 
 9.4 Reset
 
 หลังจากจบการทดลองสามารถกด Reset เพื่อคืนระบบกลับสู่สถานะเริ่มต้น
 
-
-
-ภาพที่ 4 การ Reset ระบบ
-
 ![Reset](docs/screenshots/04-reset.png)
 
-![Synchronization 2x10](docs/screenshots/05-synchronization-2x10.png)
+*ภาพที่ 4 การ Reset ระบบ*
 
 9.5 การทดสอบเพิ่มเติมด้วย 2 Threads × 10 Iterations
 
@@ -332,9 +296,9 @@ Result = COMPLETED
 
 Event Log แสดงการ Waiting for Lock, Acquired Lock และ Released Lock
 
+![Synchronization 2x10](docs/screenshots/05-synchronization-2x10.png)
 
-
-ภาพที่ 5 การทดสอบ ReentrantLock ด้วย 2 Threads × 10 Iterations
+*ภาพที่ 5 การทดสอบ ReentrantLock ด้วย 2 Threads × 10 Iterations*
 
 10. Automated Testing
 
@@ -344,7 +308,9 @@ scripts/run_tests.sh
 
 สามารถรันด้วย Git Bash:
 
+```text
 bash scripts/run_tests.sh
+```
 
 ผลการทดสอบจริง:
 
@@ -356,23 +322,18 @@ TC-01 Without Synchronization: PASS (run completed; discrepancy is timing-depend
 
 TC-03 Reset API: PASS
 
-
-
 ![Automated Tests](docs/screenshots/06-automated-tests.png)
 
-ภาพที่ 6 ผลการทดสอบ Automated Tests
+*ภาพที่ 6 ผลการทดสอบ Automated Tests*
 
 10.1 ตารางสรุป Automated Test
 
-Test Case   รายละเอียด  ผล
-
-Compile-level Test  ตรวจสอบว่า Test Class สามารถโหลดได้ PASS
-
-TC-01 Without Synchronization   ทดสอบการทำงานของ No Sync    PASS
-
-TC-02 With Synchronization  ตรวจสอบว่า Counter เท่ากับ Expected PASS
-
-TC-03 Reset API ตรวจสอบ Reset API   PASS
+| Test Case | รายละเอียด | ผล |
+|---|---|---|
+| Compile-level Test | ตรวจสอบว่า Test Class สามารถโหลดได้ | PASS |
+| TC-01 Without Synchronization | ทดสอบการทำงานของ No Sync | PASS |
+| TC-02 With Synchronization | ตรวจสอบว่า Counter เท่ากับ Expected | PASS |
+| TC-03 Reset API | ตรวจสอบ Reset API | PASS |
 
 10.2 TC-01 Without Synchronization
 
@@ -430,7 +391,9 @@ TC-02 With Synchronization: PASS
 
 Automated Test เรียก:
 
+```text
 POST /api/reset
+```
 
 และตรวจสอบว่า API ส่งค่ากลับมา:
 
@@ -442,13 +405,11 @@ TC-03 Reset API: PASS
 
 11. สรุปผลการทดสอบ
 
-Mode    Threads Iterations  Delay   Expected    Actual  Result
-
-Without Synchronization 3   100 5 ms    300 100 RACE CONDITION
-
-With ReentrantLock  3   100 5 ms    300 300 COMPLETED
-
-With ReentrantLock  2   10  0 ms    20  20  COMPLETED
+| Mode | Threads | Iterations | Delay | Expected | Actual | Result |
+|---|---:|---:|---:|---:|---:|---|
+| Without Synchronization | 3 | 100 | 5 ms | 300 | 100 | RACE CONDITION |
+| With ReentrantLock | 3 | 100 | 5 ms | 300 | 300 | COMPLETED |
+| With ReentrantLock | 2 | 10 | 0 ms | 20 | 20 | COMPLETED |
 
 จากการทดสอบผ่าน Web UI พบว่า Without Synchronization สามารถทำให้เกิด Race Condition และ Lost Update เมื่อหลาย Thread เข้าถึง Shared Counter พร้อมกัน
 
@@ -476,19 +437,27 @@ Git Bash สำหรับรัน Script บน Windows
 
 เปิด Git Bash แล้วรัน:
 
+```text
 cd /c/Users/User/ThreadSync
 
 bash scripts/run.sh
+```
 
 เมื่อ Server ทำงานจะแสดง:
 
-ThreadSync running at http://localhost:8080
+```text
+ThreadSync running at ```text
+http://localhost:8080
+```
 
 Press Ctrl+C to stop.
+```
 
 จากนั้นเปิด Browser ที่:
 
+```text
 http://localhost:8080
+```
 
 13.3 การทดลอง Without Synchronization
 
@@ -532,6 +501,8 @@ Ctrl + C
 
 14. โครงสร้างโปรเจกต์
 
+```text
+```text
 ThreadSync/
 
 ├── src/
@@ -587,11 +558,12 @@ ThreadSync/
 │
 
 └── README.md
+```
+```
 
 15. สรุป
 
 ThreadSync ทำให้แนวคิดเรื่อง Shared Resource, Race Condition, Critical Section และ ReentrantLock สามารถสังเกตได้จากหลักฐานระดับ Thread แทนการดูเพียงผลรวมสุดท้าย
-
 
 
 จากการทดสอบจริงผ่าน Web UI:
