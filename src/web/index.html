@@ -1,12 +1,60 @@
-<!doctype html><html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ThreadSync</title><link rel="stylesheet" href="/app.css"></head><body>
-<header><div><h1>ThreadSync</h1><p>Thread Synchronization & Race Condition Visualizer</p></div><div class="badge">Educational Prototype</div></header>
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#101a31"><title>ThreadSync Studio | ห้องทดลอง Thread</title>
+  <link rel="stylesheet" href="/app.css"><link rel="stylesheet" href="/theme.css"><link rel="stylesheet" href="/polish.css">
+</head>
+<body>
+<header class="app-header"><div class="header-inner">
+  <div><div class="eyebrow">ห้องทดลองระบบปฏิบัติการ • JAVA CONCURRENCY LAB</div><h1>ThreadSync <span>Studio</span></h1>
+    <p>ทดลองดูว่า Thread หลายตัวแก้ตัวแปรร่วมกันอย่างไร และ Lock ช่วยป้องกันข้อมูลหายได้อย่างไร</p></div>
+  <div class="server"><i></i> เชื่อมต่อ Java Backend • LIVE</div>
+</div></header>
 <main>
-<section class="controls card"><h2>Experiment Configuration</h2><div class="grid">
-<label>Number of Threads<input id="threads" type="number" min="2" max="8" value="3"></label>
-<label>Iterations / Thread<input id="iterations" type="number" min="1" max="1000" value="100"></label>
-<label>Delay (ms)<input id="delay" type="number" min="0" max="100" value="5"></label>
-</div><div class="actions"><button id="race" class="danger">Without Synchronization</button><button id="sync" class="primary">With Synchronization</button><button id="reset" class="ghost">Reset</button></div><div class="explain"><b>Race Condition:</b> ผลลัพธ์อาจขึ้นกับจังหวะการสลับการทำงานของ Thread เมื่อ Shared Resource ถูกเข้าถึงโดยไม่มีการควบคุมที่เพียงพอ<br><b>Synchronization:</b> Critical Section ถูกควบคุมด้วย Lock ทำให้ Thread อื่นต้องรอเมื่อ Resource ถูกถือครอง</div></section>
-<section class="dashboard"><div class="card counter"><span>Shared Counter</span><strong id="counter">0</strong><small>Expected: <b id="expected">300</b></small></div><div class="card result"><span>Result</span><strong id="result">READY</strong><small id="resultDetail">Run an experiment</small></div><div class="card holder"><span>Lock Holder</span><strong id="holder">-</strong><small id="mode">Mode: -</small></div></section>
-<section class="card"><div class="section-head"><h2>Thread Visualization</h2><span id="progressText">0 / 300 operations</span></div><div id="threadsView" class="threads"></div></section>
-<section class="card"><div class="section-head"><h2>Timeline / Event Log</h2><span id="live">Idle</span></div><div id="events" class="events"></div></section>
-</main><footer>ThreadSync Prototype • Java Standard Library • No external runtime dependency</footer><script src="/app.js"></script></body></html>
+  <section class="hero card"><div class="hero-copy"><span class="kicker">เริ่มจากแนวคิดง่าย ๆ</span><h2>ทุก Thread กำลังเพิ่ม <em>Shared Counter</em> ตัวเดียวกัน</h2>
+    <p>แต่ละรอบทำ 3 ขั้น: <b>อ่านค่า</b> → <b>บวกหนึ่ง</b> → <b>เขียนกลับ</b> ถ้าอ่านพร้อมกันแล้วเขียนทับกัน ค่าที่ควรเพิ่มอาจหายไป</p>
+    <div class="hero-steps"><span>① อ่าน (READ)</span><b>→</b><span>② คำนวณ (MODIFY)</span><b>→</b><span>③ เขียน (WRITE)</span></div></div>
+    <div class="formula"><small>ค่าที่ควรได้ (EXPECTED)</small><strong id="formula">3 × 5 = 15</strong><span>จำนวน Thread × รอบต่อ Thread</span></div>
+  </section>
+
+  <section class="card setup"><div class="section-title"><span class="section-num">01</span><div><h2>ตั้งค่าการทดลอง</h2><p>โหมดเปรียบเทียบจะใช้ input เดียวกัน แต่แยก Counter และ Worker จริงคนละชุด</p></div></div>
+    <div class="inputs">
+      <label>จำนวน Thread<input id="threads" type="number" min="2" max="8" value="3"><small>Worker ที่ทำงานพร้อมกัน (2–8)</small></label>
+      <label>จำนวนรอบต่อ Thread<input id="iterations" type="number" min="1" max="1000" value="5"><small>แต่ละรอบเพิ่ม Counter หนึ่งครั้ง</small></label>
+      <label>เวลาหน่วงแต่ละขั้น<input id="delay" type="number" min="0" max="2000" value="650"><small>มิลลิวินาที • เพิ่มเวลาเพื่อสังเกตได้ชัด</small></label>
+    </div>
+    <div class="actions"><button id="race" class="danger">▶ ทดลองไม่มี Lock</button><button id="sync" class="primary">🔒 ทดลองใช้ ReentrantLock</button><button id="compare" class="compare">⚖ เปรียบเทียบสองแบบ</button><button id="demo" class="soft">✨ ตั้งค่าสาธิต</button><button id="reset" class="ghost">↻ เริ่มใหม่</button></div>
+    <p class="setup-note">แนะนำสำหรับสาธิต: 3 Thread × 5 รอบ และหน่วง 500–700 ms เพื่อดูการสลับสถานะ</p><div id="error" class="error hidden"></div>
+  </section>
+
+  <section class="card legend-card"><div class="section-title"><span class="section-num">สี</span><div><h2>อ่านสีและสถานะ</h2><p>ใช้สีชุดเดิมทั้งการ์ด Thread, Timeline และบันทึกเหตุการณ์</p></div></div><div class="legend">
+    <span class="legend-item read"><i></i>กำลังอ่าน (READ)</span><span class="legend-item modify"><i></i>กำลังคำนวณ (MODIFY)</span><span class="legend-item write"><i></i>กำลังเขียน (WRITE)</span><span class="legend-item wait"><i></i>กำลังรอ (WAIT)</span><span class="legend-item lock"><i></i>ถือ Lock (LOCK OWNER)</span><span class="legend-item lost"><i></i>ข้อมูลอัปเดตหาย (LOST UPDATE)</span>
+  </div></section>
+
+  <section id="singleLab" class="card lab"><div class="section-title spread"><div class="title-left"><span class="section-num">02</span><div><h2>ดูการทำงานของแต่ละ Thread</h2><p>สถานะและค่าด้านล่างอ่านจาก Worker Thread จริงใน Java</p></div></div><div class="controls"><button id="pause" class="soft">Ⅱ หยุดชั่วคราว</button><button id="step" class="soft">↦ ทำทีละขั้น</button><button id="resume" class="soft">▶ ทำต่อ</button><strong id="live" class="pill">พร้อมทดลอง</strong></div></div>
+    <div class="memory-map"><div class="workers"><div class="minihead">ข้อมูลเฉพาะของแต่ละ Thread • คลิกการ์ดเพื่อเปิดประวัติ</div><div id="threadsView"></div></div><div class="critical"><div id="lockGate" class="gate unsafe">⚠ ไม่มี Lock</div><div class="flow-rail"><span>อ่าน (READ)</span><i>↓</i><span>บวก 1 (MODIFY)</span><i>↓</i><span>เขียน (WRITE)</span></div><small>ส่วนที่หลาย Thread อาจชนกัน</small></div><div class="shared"><div class="minihead">ตัวแปรที่ใช้ร่วมกัน</div><div class="orb"><small>SHARED COUNTER</small><strong id="counter">0</strong><span>ค่าเดียวกันที่ทุก Thread อ่าน/เขียน</span></div><div class="holder">ผู้ถือ Lock (LOCK OWNER)<br><b id="holder">ไม่มี / None</b></div></div></div>
+  </section>
+
+  <section id="compareLab" class="card compare-live hidden"><div class="section-title spread"><div class="title-left"><span class="section-num">02</span><div><h2>เปรียบเทียบแบบเห็นพร้อมกัน</h2><p>โจทย์เดียวกัน • Counter คนละตัว • Java Worker คนละชุด</p></div></div><div class="controls"><button id="comparePause" class="soft">Ⅱ หยุด</button><button id="compareStep" class="soft">↦ ทีละขั้น</button><button id="compareResume" class="soft">▶ ทำต่อ</button><strong id="compareLive" class="pill">กำลังเตรียม</strong></div></div>
+    <div class="same-exp"><span>ใช้ input เดียวกันทั้งสองฝั่ง</span><strong id="sameFormula">3 Thread × 5 รอบ • ควรได้ 15</strong></div>
+    <div class="dual-lab"><div class="lane no-sync"><div class="lane-head"><div><small>วิธีที่ 1</small><h3>ไม่มีการป้องกัน (WITHOUT SYNCHRONIZATION)</h3></div><div class="counter-chip">Counter <b id="raceCounter">0</b></div></div><p class="lane-note">ทุก Thread อ่านและเขียนได้โดยไม่รอคิว จึงอาจอ่านค่าเก่าซ้ำกัน</p><div id="raceThreads" class="compact-threads"></div><div id="raceNow" class="now-box warn">กำลังเริ่ม...</div></div>
+    <div class="lane with-sync"><div class="lane-head"><div><small>วิธีที่ 2</small><h3>ใช้ ReentrantLock (WITH SYNCHRONIZATION)</h3></div><div class="counter-chip safe">Counter <b id="syncCounter">0</b></div></div><p class="lane-note">Thread เข้าเขตสำคัญทีละตัว • Fair Lock ให้คิวที่รอมาก่อนมีสิทธิ์ก่อน</p><div id="syncOwner" class="owner-banner">🔓 Lock ว่าง</div><div id="syncThreads" class="compact-threads"></div><div id="syncNow" class="now-box safe">กำลังเริ่ม...</div></div></div>
+    <p class="fair-note">ใครเข้า Lock ก่อน? Worker ที่มาถึงและขอ Lock ก่อนจะได้คิวแรก ส่วนผู้ที่รอจะได้คิวตามลำดับคำขอ (Fair Lock) ลำดับแรกอาจต่างกันในแต่ละรอบเพราะ Java Runtime จัดตาราง Thread ต่างกัน</p>
+  </section>
+
+  <section class="metrics"><div class="metric card"><small>ควรได้ (EXPECTED)</small><strong id="expected">15</strong><span>จำนวน Thread × จำนวนรอบ</span></div><div class="metric card"><small>ได้จริง (ACTUAL)</small><strong id="actual">0</strong><span>ค่าจาก Shared Counter</span></div><div class="metric card"><small>ทำครบแล้ว (COMPLETED)</small><strong id="completed">0</strong><span id="progressText">0 / 15</span></div><div class="metric card"><small>อัปเดตที่หาย (LOST UPDATE)</small><strong id="lost">0</strong><span>นับจาก write ที่เกิดจริง</span></div></section>
+
+  <section class="card explain"><div class="section-title"><span class="section-num">03</span><div><h2>ตอนนี้เกิดอะไรขึ้น?</h2><p>คำอธิบายสั้น ๆ เชื่อมสถานะ Thread กับค่าที่แชร์ร่วมกัน</p></div></div><div id="insight" class="insight">ตั้งค่าการทดลอง แล้วกดปุ่มเริ่มได้เลย</div><div id="highlights" class="highlights"></div><div class="concept-grid"><article><b>Shared Counter คืออะไร?</b><p>ตัวเลขกลางที่ทุก Thread ใช้อ่านและเขียน ถ้าเขียนทับกันอาจทำให้การเพิ่มค่าหาย</p></article><article><b>Lost Update ดูจากอะไร?</b><p>Thread อ่านค่าเก่าไว้ แล้วมีการเขียนแทรกก่อนที่ Thread นั้นจะเขียนค่าของตัวเอง</p></article><article><b>Lock ช่วยอย่างไร?</b><p>ล็อกชุด READ → MODIFY → WRITE ให้ทำทีละ Thread คนอื่นจึงไม่แทรกระหว่างชุดนี้</p></article></div></section>
+
+  <section class="card inspector"><div class="section-title"><span class="section-num">04</span><div><h2>หลักฐาน Lost Update</h2><p>แสดงรายละเอียดจาก event ที่ Java บันทึกไว้ หากรอบนี้ไม่เกิดก็จะแจ้งตามผลจริง</p></div></div><div class="lost-summary"><div><small>จำนวนเหตุการณ์ที่พบ</small><strong id="lostTotal">0</strong></div><p id="lostExplain">ยังไม่มีการทดลอง จึงยังไม่มีผลให้ตรวจ</p></div><div id="lostEvents" class="lost-events"><div class="empty-state">เริ่มทดลองเพื่อดูหลักฐาน</div></div></section>
+
+  <section class="card result"><div class="section-title spread"><div class="title-left"><span class="section-num">05</span><div><h2>สรุปผลการทดลอง</h2><p>เปรียบเทียบผลปลายทางและบันทึกไว้ในตาราง</p></div></div><div class="export-actions"><button id="export" class="soft">⇩ ส่งออก JSON</button><button id="exportCsv" class="soft">⇩ ส่งออก CSV</button></div></div><div class="result-table-wrap"><table class="result-table"><thead><tr><th>ตัวชี้วัด</th><th>ไม่มี Lock</th><th>ReentrantLock</th><th>แปลว่า</th></tr></thead><tbody id="compareTable"><tr><td>ผลการทดลอง</td><td>—</td><td>—</td><td>กดเปรียบเทียบเพื่อเริ่ม</td></tr></tbody></table></div><div id="comparisonExplain" class="comparison-explain">กด “เปรียบเทียบสองแบบ” เพื่อดูผลจาก input เดียวกัน</div><div class="result-tools"><button id="replay" class="soft">⏵ เล่นซ้ำ Timeline</button><small>เล่นลำดับเหตุการณ์จากประวัติ Java Worker หลังจบการทดลอง</small></div><h3 class="history-title">ประวัติการทดลอง</h3><div class="table-wrap"><table><thead><tr><th>ครั้ง</th><th>วิธี</th><th>Thread</th><th>รอบ</th><th>ควรได้</th><th>ได้จริง</th><th>หาย</th><th>สรุป</th></tr></thead><tbody id="history"><tr class="placeholder"><td colspan="8">ยังไม่มีประวัติ</td></tr></tbody></table></div></section>
+
+  <section class="card"><div class="section-title spread"><div class="title-left"><span class="section-num">06</span><div><h2>บันทึกการทำงานสด</h2><p>ลำดับ READ, MODIFY, WRITE และ Lock จาก Java Backend</p></div></div><button id="toggleLog" class="ghost">ซ่อน / แสดง</button></div><div id="events" class="events"></div></section>
+</main>
+<div id="inspectorModal" class="inspector-modal hidden" role="dialog" aria-modal="true" aria-labelledby="inspectorTitle"><section class="inspector-panel"><header class="inspector-top"><div><span class="kicker">ประวัติจาก Java Worker จริง</span><h2 id="inspectorTitle">Thread Inspector</h2><p id="inspectorSub">เลือก Thread เพื่อดู Timeline</p></div><button id="closeInspector" class="ghost" aria-label="ปิด">✕ ปิด</button></header><div id="inspectorSummary" class="inspector-summary"></div><div class="inspector-filters"><label>กรองเหตุการณ์<select id="eventFilter"><option value="ALL">ทั้งหมด (ALL)</option><option>READ</option><option>MODIFY</option><option>WRITE</option><option value="LOCK">Lock ทั้งหมด (LOCK)</option><option value="WAIT">การรอ (WAIT)</option><option>LOST UPDATE</option></select></label><label>เลือก Iteration<select id="iterationFilter"><option value="ALL">ทุก Iteration</option></select></label></div><div id="inspectorTimeline" class="timeline"></div></section></div>
+<div id="replayModal" class="inspector-modal hidden" role="dialog" aria-modal="true" aria-labelledby="replayTitle"><section class="inspector-panel replay-panel"><header class="inspector-top"><div><span class="kicker">ทบทวนผลหลังทดลอง</span><h2 id="replayTitle">เล่นซ้ำ Timeline</h2><p>ดูทีละเหตุการณ์ว่าค่าเปลี่ยนตอนไหน และใครกำลังทำงาน</p></div><button id="closeReplay" class="ghost">✕ ปิด</button></header><div class="replay-controls"><button id="replayPlay" class="primary">▶ เล่น</button><button id="replayPrev" class="soft">← ก่อนหน้า</button><button id="replayNext" class="soft">ถัดไป →</button><label>ความเร็ว<select id="replaySpeed"><option value="1200">ช้า</option><option value="650" selected>ปกติ</option><option value="250">เร็ว</option></select></label></div><div id="replayProgress" class="replay-progress">ยังไม่มี Timeline ให้เล่น</div><input id="replayRange" type="range" min="0" max="0" value="0"><div id="replayCurrent" class="replay-current"></div><div id="replayTimeline" class="timeline"></div></section></div>
+<footer>ThreadSync Studio • เรียนรู้ Thread, Shared Memory, Race Condition และ ReentrantLock</footer>
+<script src="/app.js"></script>
+</body></html>
